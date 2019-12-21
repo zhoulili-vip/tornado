@@ -2322,10 +2322,15 @@ class _HandlerDelegate(httputil.HTTPMessageDelegate):
         # except handler, and we cannot easily access the IOLoop here to
         # call add_future (because of the requirement to remain compatible
         # with WSGI)
-        fut = gen.convert_yielded(
-            self.handler._execute(transforms, *self.path_args, **self.path_kwargs)
-        )
-        fut.add_done_callback(lambda f: f.result())
+        if self.application.__class__.__name__ == 'WSGIApplication':
+            tornado.ioloop.IOLoop.current().run_sync(
+                lambda: self.handler._execute(transforms, *self.path_args, **self.path_kwargs))
+        else:
+            fut = gen.convert_yielded(
+                self.handler._execute(transforms, *self.path_args, **self.path_kwargs)
+            )
+            fut.add_done_callback(lambda f: f.result())
+            fut.add_done_callback(lambda f: f.result())
         # If we are streaming the request body, then execute() is finished
         # when the handler has prepared to receive the body.  If not,
         # it doesn't matter when execute() finishes (so we return None)

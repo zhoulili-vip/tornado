@@ -28,8 +28,6 @@ provides WSGI support in two ways:
   and Tornado handlers in a single server.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import sys
 from io import BytesIO
 import tornado
@@ -40,7 +38,6 @@ from tornado import escape
 from tornado import httputil
 from tornado.log import access_log
 from tornado import web
-from tornado import ioloop
 from tornado.escape import native_str
 from tornado.util import unicode_type
 import urllib.parse as urllib_parse
@@ -237,7 +234,8 @@ class WSGIAdapter(object):
             method, uri, "HTTP/1.1", headers=headers, body=body,
             host=host, connection=connection)
         request._parse_body()
-        ioloop.IOLoop.current().run_sync(lambda : self.application(request))
+        self.application(request)
+
         if connection._error:
             raise connection._error
         if not connection._finished:
