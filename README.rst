@@ -16,26 +16,24 @@ applications that require a long-lived connection to each user.
 Hello, world
 ------------
 
-Here is a simple "Hello, world" example web app for Tornado:
+将tornado应用以wsgi模式运行，可以在阿里云上使用“函数计算”功能运行成功
 
 .. code-block:: python
 
-    import tornado.ioloop
     import tornado.web
+	import tornado.wsgi
 
-    class MainHandler(tornado.web.RequestHandler):
-        def get(self):
-            self.write("Hello, world")
 
-    def make_app():
-        return tornado.web.Application([
-            (r"/", MainHandler),
-        ])
+	class MainHandler(tornado.web.RequestHandler):
+		def get(self):
+			self.write("Hello, tornado")
 
-    if __name__ == "__main__":
-        app = make_app()
-        app.listen(8888)
-        tornado.ioloop.IOLoop.current().start()
+
+	application = tornado.wsgi.WSGIApplication([(r"/", MainHandler)])
+
+
+	def handler(environ, start_response):
+		return application(environ, start_response)
 
 This example does not use any of Tornado's asynchronous features; for
 that see this `simple chat room
