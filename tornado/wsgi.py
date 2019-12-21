@@ -40,14 +40,12 @@ from tornado import escape
 from tornado import httputil
 from tornado.log import access_log
 from tornado import web
+from tornado import ioloop
 from tornado.escape import native_str
-from tornado.util import unicode_type, PY3
+from tornado.util import unicode_type
+import urllib.parse as urllib_parse
 
 
-if PY3:
-    import urllib.parse as urllib_parse  # py3
-else:
-    import urllib as urllib_parse
 
 # PEP 3333 specifies that WSGI on python 3 generally deals with byte strings
 # that are smuggled inside objects of type unicode (via the latin1 encoding).
@@ -239,7 +237,7 @@ class WSGIAdapter(object):
             method, uri, "HTTP/1.1", headers=headers, body=body,
             host=host, connection=connection)
         request._parse_body()
-        self.application(request)
+        ioloop.IOLoop.current().run_sync(lambda : self.application(request))
         if connection._error:
             raise connection._error
         if not connection._finished:
